@@ -73,15 +73,21 @@ io.sockets.on('connection', function(socket)
     socket.name = "Guest"+parseInt(Math.random()*1000);
     socket.color = newColor();
     
-    // to signal the initial connection
-    socket.emit("init_connect", {name: socket.name, color: socket.color});
-    
-    // when the name is changed
+    // signal all sockets of the new client
+    io.sockets.emit("new_client", {name: socket.name, color: socket.color});
+
+    // when a name is changed
     socket.on('name_change', function(data){
         // TODO: check for no name collision
+        
+        // keep their old name
+        var oldname = socket.name;
+            
+        // update to their new name
         socket.name = data.name;
         
-        socket.emit("name_change", {name: socket.name});
+        // send the name change message to all
+        io.sockets.emit("name_change", {name: socket.name, oldname: oldname});
     });
     
     // d/c
