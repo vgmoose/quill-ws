@@ -12,8 +12,6 @@ server.listen(80);
 
 app.use(express.static(process.cwd() + '/'));
 
-counter = 0;
-
 function getAllNearbyPeople(socket)
 {
     console.log("Finding people near " + socket.id + " at " + socket.lat + ", " + socket.long);
@@ -71,8 +69,8 @@ function newColor()
 // handle incoming connections from clients
 io.sockets.on('connection', function(socket)
 {
-    counter++;
-    socket.name = "Guest"+counter;
+    // generate name and color
+    socket.name = "Guest"+parseInt(Math.random()*1000);
     socket.color = newColor();
     
     // to signal the initial connection
@@ -88,7 +86,6 @@ io.sockets.on('connection', function(socket)
     
     // d/c
     socket.on('disconnect', function(){
-        counter--;
 //        io.sockets.emit('drop_player', {'id' : id});
     });
 });
