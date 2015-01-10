@@ -74,63 +74,19 @@ io.sockets.on('connection', function(socket)
     counter++;
     socket.name = "Guest"+counter;
     socket.color = newColor();
+    
+    // to signal the initial connection
     socket.emit("init_connect", {name: socket.name, color: socket.color});
     
-    socket.on("get_new_id", function(data) {
-        counter += 1;
-        socket.emit("assign_id", {id : counter});
-        console.log("Client requested ID, sent them " + counter);
-        smatrix[counter] = socket;
-    });
-    
-    console.log("New client connected.");
-    
-    socket.on("set_pic", function(data) {
-        console.log("Received pic: " + data);
-        socket.pic = data;
-    });
-    
-    socket.on("login", function(data) {
-        console.log("Got login request from client " + data);
-        socket.id = data;
-        smatrix[socket.id] = socket;
-        //TODO: mark this client as online
-    });
-    
-    socket.on("set_status", function(data) {
-        socket.status = data;
-        socket.radius = 1;
-        console.log("set " + socket.id + "'s status to " + data);
-    });
-    
-    socket.on("set_coordinates", function(data) {
-        socket.lat = data.split(" ")[0];
-        socket.long = data.split(" ")[1];
+    // when the name is changed
+    socket.on('name_change', function(data){
+        // TODO: check for no name collision
+        socket.name = data.name;
         
-        console.log("set " + socket.id + "'s coor to " + socket.lat + " " + socket.long);
-    }); 
-    
-    socket.on("get_people", function(data) {
-        near = getAllNearbyPeople(socket);
-        returnme = []
-        for (var val in near)
-            returnme[val] = smatrix[near[val]];
-        socket.emit("new_people", returnme);
+        socket.emit("name_change", {name: socket.name});
     });
     
-    socket.on("send_message", function(data) {
-        var target = data.id;
-        var message = data.message;
-        
-        socket.emit("get_message", data);
-    });
-
-    socket.on('get_move', function(data) {
-//        data.id = id;
-        console.log(data);
-        socket.broadcast.emit('recv_move', data);
-    });
-
+    // d/c
     socket.on('disconnect', function(){
         counter--;
 //        io.sockets.emit('drop_player', {'id' : id});

@@ -5,27 +5,44 @@ var advancedEditor, authorship, basicEditor, cursorManager, name, socket, _;
 
 function changename()
 {
-    name = prompt("Enter your new name. This will appear above your cursor");
-    $("#nameb").html(name);
+    // prompt for a new name
+    var out = prompt("Enter your new name. This will appear above your cursor");
+    
+    // send the name if updated
+    if (out!="" && out != null && out != name)
+    {
+        socket.emit("name_change", {name: out});
+    }
 }
 
 function initial_connect()
 {
+        // try to connect
         $("#statust").html("Connecting...");
         socket = io.connect();
-    socket.on("init_connect", connected);
+    
+        // attach event listeners
+        socket.on("init_connect", connected);
+        socket.on("name_change", update_name);
 }
 
 function connected(data)
 {
-     $("#statust").html("Connected!");
-        name = data.name;
-        color = data.color;
-    console.log("You are " + name + " with color " + color);
+        // client is connected successfully
+        $("#statust").html("Connected!");
         $("#infopanel").show();
-
-        $("#nameb").html(name);
+    
+        // update name and color info
+        update_name(data);
+        color = data.color;
         $("#colorb").css("background-color", color);
+}
+
+function update_name(data)
+{
+    // set this client's name from the server
+    name = data.name;
+    $("#nameb").html(name);
 }
 
 _ = Quill.require('lodash');

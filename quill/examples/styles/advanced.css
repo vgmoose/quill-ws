@@ -38,6 +38,11 @@
     display: none;
 }
 
+#nameb
+{
+        font-size: 15px;
+}
+
 #colorb {
     width: 65px;
     height: 25px;
