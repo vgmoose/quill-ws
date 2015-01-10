@@ -30,6 +30,13 @@ function initial_connect()
         // attach event listeners
         socket.on("new_client", new_client);
         socket.on("name_change", update_name);
+        socket.on("new_msg", new_msg);
+}
+
+function new_msg(data)
+{
+    // this is called when a new chat message is received
+    dispMsg(data.sender, data.msg);
 }
 
 function new_client(data)
@@ -71,7 +78,10 @@ function dispMsg(username, message)
         col = users[username].color;
     
     // append the message to the actual textbox
-    $("#cbox").append("<div class='"+c+"'><span class='uname' style='color: "+col+";'>"+username+"</span>"+message+"</div>");
+    $("#cbox").append("<div class='"+c+"'><span class='uname' style='color: "+col+";'>"+username+"</span> "+message+"</div>");
+    
+    // scroll the chat window to the bottom
+    $("#cbox").stop().animate({scrollTop:$("#cbox")[0].scrollHeight}, 1000);
 }
 
 function connected(data)
@@ -128,6 +138,23 @@ function update_name(data)
     else
         userInit(data.name, data.color);
 }
+
+// on enter key pressed in chat
+$(function() {
+    $("#inputt").keypress(function (e) {
+        if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
+            // send message to server
+            socket.emit("msg_recv", {msg: $("#inputt").val()});
+            
+            // clear the input box
+            $("#inputt").val("");
+            
+            return false;
+        } else {
+            return true;
+        }
+    });
+});
 
 _ = Quill.require('lodash');
 

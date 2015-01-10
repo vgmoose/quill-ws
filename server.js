@@ -90,6 +90,12 @@ io.sockets.on('connection', function(socket)
         io.sockets.emit("name_change", {name: socket.name, oldname: oldname});
     });
     
+    // when a message is received
+    socket.on('msg_recv', function(data){
+        // notify all clients
+        io.sockets.emit("new_msg", {sender: socket.name, msg: data.msg});
+    });
+    
     // d/c
     socket.on('disconnect', function(){
 //        io.sockets.emit('drop_player', {'id' : id});
