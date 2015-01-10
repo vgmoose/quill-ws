@@ -1,0 +1,60 @@
+.basic-wrapper,
+.advanced-wrapper {
+  border: 1px solid #ccc;
+  float: left;
+  margin-left: 3%;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+.basic-wrapper {
+  width: 40%;
+}
+.advanced-wrapper {
+  width: 50%;
+}
+.editor-container {
+  height: 400px;
+}
+.toolbar-container {
+  border-bottom: 1px solid #ccc;
+}
+.basic-wrapper .toolbar-container {
+  padding: 8px 14px;
+}
+.basic-wrapper .toolbar-container .ql-active,
+.basic-wrapper .toolbar-container button:hover {
+  color: #008000;
+  font-weight: bold;
+}
+
+#statust
+{
+    font-style: italic;
+    font-color: #777777;
+}
+
+#infopanel
+{
+    display: none;
+}
+
+#colorb {
+    width: 65px;
+    height: 25px;
+    border-radius: 5px;
+    display: inline-block;
+    background-color: white;
+}
+
+#prefs {
+    font-family:  arial, sans-serif;
+    right:0;
+    border-color:black;
+    margin: 10px;
+    padding:20px;
+    margin-right:100px;
+    border-width:1px;
+    border-style: dotted;
+    width:200px;
+    position:absolute;
+}

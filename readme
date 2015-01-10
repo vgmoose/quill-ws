@@ -1,0 +1,7 @@
+Quilljs with Websockets
+
+to run the demo, clone the repo and run:
+node install
+sudo node server.js
+
+If you do not wish to su, you can change the port in server.js and run it without root.

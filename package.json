@@ -1,0 +1,11 @@
+{
+  "name": "mini-server",
+  "description": "A server for misc things",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "*",
+    "socket.io": "^1.0.6",
+    "mongojs": "*"
+  }
+}
