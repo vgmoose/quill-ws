@@ -33,6 +33,16 @@ function initial_connect()
         socket.on("new_msg", new_msg);
         socket.on("the_others", receive_others);
         socket.on("drop_client", drop_client);
+        socket.on("disconnect", disconnect);
+}
+
+function disconnect()
+{
+        $("#statust").html("Disconnected");
+        $("#infopanel").hide();
+        $("#chat").hide();
+    
+        name = "";
 }
 
 function drop_client(data)
@@ -117,6 +127,10 @@ function connected(data)
         color = data.color;
         $("#colorb").css("background-color", color);
     
+        // create the cursor
+        cursorManager.setCursor("advanced", 0, name, users[name].color);
+
+    
         // append self to the users array (ids are local)
 //        userInit(name, color);
 }
@@ -129,6 +143,10 @@ function userInit(username, user_col)
     
     // display a status message
     statusMsg("<b>"+username+"</b> has connected.");
+    
+    // create an author for them
+//    authorship.addAuthor(username, user_col);
+
 }
 
 function updateUser(oldname, newname)
@@ -143,18 +161,23 @@ function updateUser(oldname, newname)
 
 function update_name(data)
 {
-    // if the old name was us (or name isn't set), update our name onscreen
-    if (data.oldname == name || name == "")
-    {
-        // set this client's name from the server
-        name = data.name;
-        $("#nameb").html(name);
-    }
     
     if (data.oldname in users)
         updateUser(data.oldname, data.name);
     else
         userInit(data.name, data.color);
+    
+        // if the old name was us (or name isn't set), update our name onscreen
+    if (data.oldname == name || name == "")
+    {
+        // set this client's name from the server
+        name = data.name;
+        $("#nameb").html(name);
+    
+        // update the cursor
+        cursorManager.removeCursor("advanced");
+        cursorManager.setCursor("advanced", 0, name, users[name].color);
+    }
 }
 
 // on enter key pressed in chat
@@ -193,9 +216,9 @@ advancedEditor = new Quill('.advanced-wrapper .editor-container', {
   theme: 'snow'
 });
 
-authorship = advancedEditor.getModule('authorship');
-
-authorship.addAuthor('basic', 'rgba(255,153,51,0.4)');
+//authorship = advancedEditor.getModule('authorship');
+//
+//authorship.addAuthor('basic', 'rgba(255,153,51,0.4)');
 
 cursorManager = advancedEditor.getModule('multi-cursor');
 
@@ -205,17 +228,17 @@ advancedEditor.on('selection-change', function(range) {
   return console.info('advanced', 'selection', range);
 });
 
-advancedEditor.on('text-change', function(delta, source) {
-  var sourceDelta, targetDelta;
-  if (source === 'api') {
-    return;
-  }
-  console.info('advanced', 'text', delta, source);
-//  basicEditor.updateContents(delta);
-  sourceDelta = advancedEditor.getContents();
-//  targetDelta = basicEditor.getContents();
-  return console.assert(_.isEqual(sourceDelta, targetDelta), "Editor diversion!", sourceDelta.ops, targetDelta.ops);
-});
+//advancedEditor.on('text-change', function(delta, source) {
+//  var sourceDelta, targetDelta;
+//  if (source === 'api') {
+//    return;
+//  }
+//  console.info('advanced', 'text', delta, source);
+////  basicEditor.updateContents(delta);
+//  sourceDelta = advancedEditor.getContents();
+////  targetDelta = basicEditor.getContents();
+//  return console.assert(_.isEqual(sourceDelta, targetDelta), "Editor diversion!", sourceDelta.ops, targetDelta.ops);
+//});
 
 function addCSSRule(sel, prop, val) {
     for(var i = 0; i < document.styleSheets.length; i++){
