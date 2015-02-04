@@ -31,6 +31,24 @@ function initial_connect()
         socket.on("new_client", new_client);
         socket.on("name_change", update_name);
         socket.on("new_msg", new_msg);
+        socket.on("the_others", receive_others);
+        socket.on("drop_client", drop_client);
+}
+
+function drop_client(data)
+{
+    statusMsg("<b>"+data.name + "</b> has disconnected.");
+    delete users[data.name];
+}
+
+function receive_others(data)
+{
+    var people = data["others"];
+    for (var i in people)
+    {
+        var person = people[i];
+        userInit(person.name, person.color);
+    }
 }
 
 function new_msg(data)
@@ -187,17 +205,17 @@ advancedEditor.on('selection-change', function(range) {
   return console.info('advanced', 'selection', range);
 });
 
-//advancedEditor.on('text-change', function(delta, source) {
-//  var sourceDelta, targetDelta;
-//  if (source === 'api') {
-//    return;
-//  }
-//  console.info('advanced', 'text', delta, source);
-////  basicEditor.updateContents(delta);
-//  sourceDelta = advancedEditor.getContents();
-////  targetDelta = basicEditor.getContents();
-//  return console.assert(_.isEqual(sourceDelta, targetDelta), "Editor diversion!", sourceDelta.ops, targetDelta.ops);
-//});
+advancedEditor.on('text-change', function(delta, source) {
+  var sourceDelta, targetDelta;
+  if (source === 'api') {
+    return;
+  }
+  console.info('advanced', 'text', delta, source);
+//  basicEditor.updateContents(delta);
+  sourceDelta = advancedEditor.getContents();
+//  targetDelta = basicEditor.getContents();
+  return console.assert(_.isEqual(sourceDelta, targetDelta), "Editor diversion!", sourceDelta.ops, targetDelta.ops);
+});
 
 function addCSSRule(sel, prop, val) {
     for(var i = 0; i < document.styleSheets.length; i++){

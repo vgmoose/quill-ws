@@ -6,47 +6,11 @@ var io = require('socket.io').listen(server);
 
 
 var uri = "localhost",
-    db = mongojs.connect(uri, ["proxi"]);
+    db = mongojs.connect(uri, ["quill"]);
 
 server.listen(80);
 
 app.use(express.static(process.cwd() + '/'));
-
-function getAllNearbyPeople(socket)
-{
-    console.log("Finding people near " + socket.id + " at " + socket.lat + ", " + socket.long);
-    var ids = [];
-    
-    for (x in smatrix)
-    {
-        console.log("Checking " + smatrix[x].id + " against " + socket.id);
-        if (smatrix[x].id !== socket.id)
-            if (isInCircle(socket.lat, socket.long, 1, smatrix[x].lat, smatrix[x].long, 1))
-                ids.push(smatrix[x].id);
-    
-    }
-    console.log("ID list: " + ids);
-    return ids;
-}
-
-function isInCircle(x1, y1, r1, x2, y2, r2)
-{
-    r = r1;
-    // take smaller radius
-    if (r1 > r2)
-        r = r2;
-    
-    // radius is in km, convert to long/lat
-    r /= 111;
-    
-    // get differences in x and y
-    xd = x1 - x2;
-    xd *= xd;
-    yd = y1 - y2;
-    yd *= yd
-    
-    return Math.sqrt(xd + yd) < r;
-}
 
 //db.proxi.save({"counter": "red"}, function(err, records) {
 //    console.log("error");
@@ -66,6 +30,49 @@ function newColor()
   return i>5 ? null : a[Math.floor(Math.random()*16)] }).join('');
 }
 
+function tellAboutOthers(socket)
+{
+    var data = [];
+    
+    var connected = findClientsSocket();
+        
+    for (var i in connected)
+    {
+        var client = connected[i];
+        if (socket == client)
+            continue;
+        
+        // append this client's info to the data
+        data.push({name: client.name, color: client.color});
+    }
+    
+    if (data.length > 0)
+    {
+        console.log(data);
+        // send the data back to the original socket
+        socket.emit("the_others", {others: data});
+    }
+}
+
+function findClientsSocket(roomId, namespace) {
+    var res = []
+    , ns = io.of(namespace ||"/");    // the default namespace is "/"
+
+    if (ns) {
+        for (var id in ns.connected) {
+            if(roomId) {
+                var index = ns.connected[id].rooms.indexOf(roomId) ;
+                if(index !== -1) {
+                    res.push(ns.connected[id]);
+                }
+            } else {
+                res.push(ns.connected[id]);
+            }
+        }
+    }
+    return res;
+}
+
 // handle incoming connections from clients
 io.sockets.on('connection', function(socket)
 {
@@ -75,6 +82,9 @@ io.sockets.on('connection', function(socket)
     
     // signal all sockets of the new client
     io.sockets.emit("new_client", {name: socket.name, color: socket.color});
+    
+    // tell this new client about the others
+    tellAboutOthers(socket);
 
     // when a name is changed
     socket.on('name_change', function(data){
@@ -98,6 +108,6 @@ io.sockets.on('connection', function(socket)
     
     // d/c
     socket.on('disconnect', function(){
-//        io.sockets.emit('drop_player', {'id' : id});
+        io.sockets.emit('drop_client', {'name' : socket.name});
     });
 });
