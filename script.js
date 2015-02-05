@@ -34,6 +34,22 @@ function initial_connect()
         socket.on("the_others", receive_others);
         socket.on("drop_client", drop_client);
         socket.on("disconnect", disconnect);
+    
+        // for positions and text
+//        socket.on("recv_pos", recv_pos);
+//        socket.on("recv_text", recv_text);
+        socket.on("recv_delta", recv_delta);
+
+}
+
+function recv_delta(data)
+{
+    advancedEditor.updateContents(data);
+}
+
+function send_pos()
+{
+    socket.emit("send_pos", {pos: 0});
 }
 
 function disconnect()
@@ -47,7 +63,7 @@ function disconnect()
 
 function drop_client(data)
 {
-    statusMsg("<b>"+data.name + "</b> has disconnected.");
+    statusMsg("<span class='uname' style='color: "+users[data.name].color+";'>"+data.name + "</span> has disconnected.");
     delete users[data.name];
 }
 
@@ -142,7 +158,7 @@ function userInit(username, user_col)
     users[username] = {color: user_col};
     
     // display a status message
-    statusMsg("<b>"+username+"</b> has connected.");
+    statusMsg("<span class='uname' style='color: "+users[username].color+";'>"+username+"</span> has connected.");
     
     // create an author for them
 //    authorship.addAuthor(username, user_col);
@@ -156,7 +172,7 @@ function updateUser(oldname, newname)
     delete users[oldname];
     
     // display a status message
-    statusMsg(""+oldname+" is now known as <b>"+newname+"</b>");
+    statusMsg(""+oldname+" is now known as <span class='uname' style='color: "+users[newname].color+";'>"+newname+"</b>");
 }
 
 function update_name(data)
@@ -228,17 +244,19 @@ advancedEditor.on('selection-change', function(range) {
   return console.info('advanced', 'selection', range);
 });
 
-//advancedEditor.on('text-change', function(delta, source) {
-//  var sourceDelta, targetDelta;
-//  if (source === 'api') {
-//    return;
-//  }
-//  console.info('advanced', 'text', delta, source);
-////  basicEditor.updateContents(delta);
+advancedEditor.on('text-change', function(delta, source) {
+  var sourceDelta, targetDelta;
+  if (source === 'api') {
+    return;
+  }
+//  basicEditor.updateContents(delta);
 //  sourceDelta = advancedEditor.getContents();
-////  targetDelta = basicEditor.getContents();
+    
+  socket.emit("send_delta", delta);
+    
+//  targetDelta = basicEditor.getContents();
 //  return console.assert(_.isEqual(sourceDelta, targetDelta), "Editor diversion!", sourceDelta.ops, targetDelta.ops);
-//});
+});
 
 function addCSSRule(sel, prop, val) {
     for(var i = 0; i < document.styleSheets.length; i++){

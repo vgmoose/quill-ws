@@ -106,6 +106,12 @@ io.sockets.on('connection', function(socket)
         io.sockets.emit("new_msg", {sender: socket.name, msg: data.msg});
     });
     
+    // delta received
+    socket.on('send_delta', function(data){
+        // notify the OTHER clients
+        socket.broadcast.emit("recv_delta", data);
+    });
+    
     // d/c
     socket.on('disconnect', function(){
         io.sockets.emit('drop_client', {'name' : socket.name});
